@@ -25,6 +25,8 @@
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#usage">Usage</a></li>
+        <li><a href="#running">Running</a></li>
+        <li><a href="#for-running">For running</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -66,6 +68,20 @@ You must have `rust` and `cargo` installed.
    cargo build --release
    ```
 
+### Running
+
+| short | long       | description                          | required | default      |
+| ----- | ---------- | ------------------------------------ | -------- | ------------ |
+| -i    | --interval | Sets healthcheck interval in seconds | false    | 30           |
+| -p    | --port     | Sets port for server                 | flase    | 5000         |
+| -c    | --creds    | Sets filename for credentials        | false    | tellme.creds |
+| -h    | --help     | Print usage information              | false    |              |
+
+#### For running
+```sh
+cargo run --release -- <params here>
+```
+
 ### Usage
 
 1) On server startup `tellme.creds` file is created with login and password for access
@@ -74,7 +90,7 @@ You must have `rust` and `cargo` installed.
 import request
 
 response = request.post("{server_ip}/newtoken", data = dict(login    = login_from_file,
-                                                      password = password_from_file))
+                                                            password = password_from_file))
 
 if response.status_code == 200:
   print("Access token: ", response.json().get("token", None))
