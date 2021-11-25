@@ -24,6 +24,7 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#usage">Usage</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -34,31 +35,25 @@
 
 
 
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 If you need fast service registry without pain - use this (not for production)
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 
 
 ### Built With
 
 
-* [actix-web](https://actix.rs//)
+* [actix-web](https://actix.rs/)
 * [Rust](https://rust.org/)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-You must have rust and cargo installed
+You must have `rust` and `cargo` installed.
 
 ### Installation
 
@@ -70,50 +65,105 @@ You must have rust and cargo installed
    ```sh
    cargo build --release
    ```
-3. run
-   ```sh
-   cargo run --release
-   ```
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+### Usage
+
+1) On server startup `tellme.creds` file is created with login and password for access
+2) If you want to register service you firstly need access token.
+```python
+import request
+
+response = request.post("{server_ip}/newtoken", data = dict(login    = login_from_file,
+                                                      password = password_from_file))
+
+if response.status_code == 200:
+  print("Access token: ", response.json().get("token", None))
+```
+3) Then you need to send request to server with access token and params
+Server will recive you your unique identifier
+
+| param                | decription                                   |
+| -------------------- | -------------------------------------------- |
+| access_token         | Token given in last request                  |
+| healthcheck_endpoint | Point for ping service to check availability |
+| service_type         | Type of the service for query in /find       |
+```python
+import request
+
+response = request.post("{server_ip}/me", data = dict(access_token         = access_token,
+                                                      healthcheck_endpoint = "{anyserver}/{any route}",
+                                                      service_type         = "storage node"))
+if response.status_code == 200:
+  identifier = response.json().get("identifier", None)
+
+```
+
+
+4) Now your service is not shown to any other clients. You need to accept it.
+```python
+import request
+
+response = request.post("{server_ip}/accept", data = dict(login      = login_from_file,
+                                                          password   = password_from_file,
+                                                          identifier = identifier))
+if response.status_code = 202:
+  print("Service was successfully accepted!")
+
+```
+
+5) Now it is available and shown to others.
+You can get information about services using /find
+
+
+| param        | decription                                                              |
+| ------------ | ----------------------------------------------------------------------- |
+| limit        | limits the amount of services to be returned  `usize`                   |
+| is_available | returns services which are now available. Default: returns all services |
+| service_type | type of the services to filter on. Default: all types are returned      |
+
+```python
+import request
+
+response = request.get("{server_ip}/find", params = dict()
+if response.status_code = 200:
+  print("Services: ", response.json())
+
+```
 
 
 ## Roadmap
 
-- [ ] Add ping service
+- [ ] Add ping service (mocked now)
 - [ ] SSL Support
 - [ ] Cli tool for admins (tellme-cli)
 
 
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Contributing
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request.
+You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Feature Branch (`git checkout -b feature/feature`)
+3. Commit your Changes (`git commit -m 'Add some feature'`)
+4. Push to the Branch (`git push origin feature/feature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Contact
 
-Me - [@clowzed](https://vk.com/clowzed) - clowzed.work@gmail.com
+Me - [@clowzed](https://vk.com/clowzed) - [clowzed.work@gmail.com](mailto:clowwzed.work@gmail.com)
 
-Project Link: [https://github.com/clowzed/tellme](https://github.com/clowzed/tellme)
+Project - [https://github.com/clowzed/tellme](https://github.com/clowzed/tellme)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 
