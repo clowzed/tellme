@@ -1,0 +1,14 @@
+[package]
+name = "tellme"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+argparse = "0.2.2"
+actix-web = { version = "3.0.0-alpha.2", features=["rustls"] }
+uuid = { version = "0.8", features = ["v4"] }
+serde_json = "*"
+serde = "*"
+rand = "*"
+env_logger = "*"
+rustls = "0.17.0"
