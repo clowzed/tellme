@@ -146,6 +146,26 @@ async fn accept_service(data: web::Data<std::sync::Mutex<AppState>>, form:web::F
     Ok(HttpResponse::Accepted().into())
 }
 
+#[post("/disable_service")]
+async fn disable_service(data: web::Data<std::sync::Mutex<AppState>>, form:web::Form<AcceptForm>) -> Result<HttpResponse>
+{
+    let mut app_data = data.lock().unwrap();
+
+    if hashme!(form.login)    != app_data.admin_credentials.login_hash    ||
+       hashme!(form.password) != app_data.admin_credentials.password_hash
+    {
+        return Err(actix_web::error::ErrorUnauthorized("Bad credentials!"));
+    }
+
+    if !app_data.services.contains_key(&form.identifier)
+    {
+        return  Err(actix_web::error::ErrorNotFound("Identifier was not found!"));
+    }
+
+    app_data.services.get_mut(&form.identifier).unwrap().is_accepted = false;
+
+    Ok(HttpResponse::Accepted().into())
+}
 
 #[get("/find")]
 async fn find(data: web::Data<std::sync::Mutex<AppState>>, query: web::Query<FindForm>) -> Result<HttpResponse>
@@ -357,6 +377,7 @@ async fn main() -> std::io::Result<()>
          .service(register_service)
          .service(find)
          .service(accept_service)
+         .service(disable_service)
          .service(new_token)
     )
     .bind(format!("0.0.0.0:{}", port))?
