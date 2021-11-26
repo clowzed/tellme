@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use actix_web::middleware::Logger;
+use actix_web::client::Client;
 
 
 macro_rules! hashme
@@ -279,6 +280,7 @@ async fn main() -> std::io::Result<()>
         Ok(()) => {},
         Err(e) => {
             println!("Failed to write login to file! Reason: {}", e.to_string());
+            return Ok(()); // Hmm why ok?
         }
     }
 
@@ -287,6 +289,7 @@ async fn main() -> std::io::Result<()>
         Ok(()) => {},
         Err(e) => {
             println!("Failed to write password to file! Reason: {}", e.to_string());
+            return Ok(()); // Hmm why ok?
         }
     }
 
@@ -302,12 +305,23 @@ async fn main() -> std::io::Result<()>
 
 
     let cloned_data = app_data.clone();
+
+
     actix_web::rt::spawn(async move
         {
             let mut interval = actix_web::rt::time::interval(std::time::Duration::from_secs(healthcheck_interval_seconds));
+
+            let connector = actix_web::client::Connector::new()
+                                                                                                                .timeout(std::time::Duration::from_secs(100))
+                                                                                                                .finish();
+            let client = actix_web::client::ClientBuilder::new()
+                                                                .connector(connector)
+                                                                .timeout(std::time::Duration::from_secs(100)) // Why 100? Well first connect requires too long time som Timeout is recieved. Look at actix-web issues
+                                                                .finish();
             loop
                 {
                     interval.tick().await;
+
                     let services = &cloned_data.lock().unwrap().services.values()
                                                                             .cloned()
                                                                             .filter(|service|
@@ -317,11 +331,19 @@ async fn main() -> std::io::Result<()>
                     {
                         let status:bool =
                         {
-                            //Mock
-                            false
+                            let response = client.get(&service.healthcheck_endpoint)
+                                                                                  .send()
+                                                                                  .await;
+                            match response
+                            {
+                                Ok(response) => response.status().is_success(),
+                                Err(_) => false,
+                            }
                         };
 
-                        cloned_data.lock().unwrap().services.get_mut(&service.identifier).unwrap().available = status;
+                        cloned_data.lock().unwrap().services.get_mut(&service.identifier)
+                                                            .unwrap()
+                                                            .available = status;
                     }
 
                 }
