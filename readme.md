@@ -149,8 +149,7 @@ if response.status_code = 200:
 
 ## Roadmap
 
-- [ ] Add ping service (mocked now)
-- [ ] SSL Support
+- [✔] Add ping service (mocked now)
 - [ ] Cli tool for admins (tellme-cli)
 
 
