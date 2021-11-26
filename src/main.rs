@@ -3,8 +3,6 @@ use std::collections::HashMap;
 use std::io::prelude::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use actix_web::middleware::Logger;
-use actix_web::client::Client;
 
 
 macro_rules! hashme
@@ -119,7 +117,10 @@ async fn new_token(data: web::Data<std::sync::Mutex<AppState>>, form : web::Form
     let new_token = uuid::Uuid::new_v4().to_string();
     app_data.access_tokens_hashes.push(hashme!(new_token));
 
-    Ok(HttpResponse::Ok().set_header(actix_web::http::header::CONTENT_TYPE, "application/json").json(Token{token: new_token}))
+    Ok(HttpResponse::Ok()
+                        .set_header(actix_web::http::header::CONTENT_TYPE, 
+                                    "application/json")
+                        .json(Token{token: new_token}))
 
 }
 
@@ -228,8 +229,6 @@ async fn register_service(data: web::Data<std::sync::Mutex<AppState>>, form:web:
 #[actix_web::main]
 async fn main() -> std::io::Result<()>
 {
-    std::env::set_var("RUST_LOG", "actix_web=debug");
-    env_logger::init();
 
     let mut healthcheck_interval_seconds :u64 = 30;
     let mut port                         :u32 = 5000;
@@ -312,8 +311,8 @@ async fn main() -> std::io::Result<()>
             let mut interval = actix_web::rt::time::interval(std::time::Duration::from_secs(healthcheck_interval_seconds));
 
             let connector = actix_web::client::Connector::new()
-                                                                                                                .timeout(std::time::Duration::from_secs(100))
-                                                                                                                .finish();
+                                                                .timeout(std::time::Duration::from_secs(100))
+                                                                .finish();
             let client = actix_web::client::ClientBuilder::new()
                                                                 .connector(connector)
                                                                 .timeout(std::time::Duration::from_secs(100)) // Why 100? Well first connect requires too long time som Timeout is recieved. Look at actix-web issues
@@ -359,7 +358,6 @@ async fn main() -> std::io::Result<()>
          .service(find)
          .service(accept_service)
          .service(new_token)
-        .wrap(Logger::default())
     )
     .bind(format!("0.0.0.0:{}", port))?
     .run()
