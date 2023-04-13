@@ -1,5 +1,6 @@
 # Tellme
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/clowzed/tellme?color=u&label=docker%20image%20size)   ![GitHub](https://img.shields.io/github/license/clowzed/tellme?color=g)
+[![build](https://github.com/clowzed/tellme/actions/workflows/build.yml/badge.svg)](https://github.com/clowzed/tellme/actions/workflows/build.yml)
 
 Tiny service registry with notifications feature
 
