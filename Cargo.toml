@@ -1,0 +1,19 @@
+[package]
+name    = "tellme"
+version = "1.0.0"
+edition = "2018"
+author  = "Miasnenko Dmitry <clowzed.work@gmail.com>"
+description = "Simple service registry with notifications feature"
+license = "MIT"
+
+
+[dependencies]
+actix-web = { version = "4.3.1", features=["rustls"] }
+uuid = { version = "0.8", features = ["v4"] }
+rustls = "0.17.0"
+reqwest = { version = "0.11.16", features = ["json"] }
+dotenv = "0.15.0"
+env_logger = "0.10.0"
+url = { version = "2.3.1", features = ["serde"] }
+serde_json = "1.0.95"
+serde = "1.0.160"

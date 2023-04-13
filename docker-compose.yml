@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  service-registry:
+    image: clowzed/tellme:latest
+    build: .
+    environment:
+      - PORT=8080
+      - HEALTHCHECK_INTERVAL=30
+      - LOGIN=my-login
+      - PASSWORD=my-password
